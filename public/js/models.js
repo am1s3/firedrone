@@ -15,7 +15,7 @@
   function renderChip() {
     const chip = document.getElementById('models');
     if (chip) {
-      chip.textContent = 'FPV-1: ' + status.drone + ' · CITY: ' + status.city;
+      chip.textContent = 'FP-1: ' + status.drone + ' · CITY: ' + status.city;
     }
   }
 
@@ -86,7 +86,8 @@
     const center = box.getCenter(new THREE.Vector3());
 
     const maxDim = Math.max(size.x, size.y, size.z) || 1;
-    const s = 0.72 / maxDim;
+    // БПЛА FP-1 крупнее квадрика — масштаб под размер фюзеляжа 2.8 м
+    const s = 2.8 / maxDim;
 
     skin.scale.setScalar(s);
     skin.position.set(-center.x * s, -center.y * s, -center.z * s);
@@ -112,13 +113,14 @@
     const props = [];
     skin.traverse((o) => {
       const n = (o.name || '').toLowerCase();
-      if (/prop|rotor|blade|spin|motor/.test(n)) {
+      // Ищем пропеллеры/винты в GLB-модели для привязки к вращению двигателя
+      if (/prop|rotor|blade|spin|motor|fan|screw|impeller/.test(n)) {
         props.push(o);
       }
     });
 
-    if (props.length >= 2) {
-      rt.propGroups = props.slice(0, 4);
+    if (props.length >= 1) {
+      rt.propGroups = props.slice(0, 2);
     }
 
     return true;
@@ -143,6 +145,7 @@
     const city = gltf.scene || (gltf.scenes && gltf.scenes[0]);
     if (!city) return false;
 
+    // Удаляем процедурные здания-боксы (сигнатура: массив из 6 материалов)
     const toRemove = [];
     scene.traverse((o) => {
       if (o.isMesh && Array.isArray(o.material) && o.material.length === 6) {
@@ -163,6 +166,7 @@
 
     const cityRoot = normalizeCity(city, 300);
 
+    // Ставим 3 экземпляра города вокруг зоны полётов БПЛА
     const spots = [
       { x: -340, z: -340, ry: 0.6, s: 1.15 },
       { x: 430, z: -250, ry: -1.25, s: 1.0 },
