@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FPV-1 ULTRA // Training Simulator</title>
+  <title>FP-1 // БПЛА Combat Simulator</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -19,16 +19,16 @@
   </div>
 
   <div id="replayBadge">REPLAY // CINEMATIC</div>
-  <div id="cineHint">SPACE / ESC — пропустить · C — камера · R — респаун</div>
+  <div id="cineHint">SPACE / ESC — пропустить · C — камера · R — рестарт</div>
 
   <div id="hud">
     <div id="topbar">
-      <div id="armed" class="chip disarmed">DISARMED</div>
+      <div id="armed" class="chip disarmed">STANDBY</div>
       <div id="mode" class="chip">FPV</div>
-      <div id="models" class="chip">FPV-1: PROC · CITY: PROC</div>
+      <div id="models" class="chip">FP-1: PROC · CITY: PROC</div>
       <div id="timer" class="chip">00:00.000</div>
-      <div id="gate" class="chip">GATE 1/12</div>
-      <div id="lap" class="chip">LAP 1</div>
+      <div id="gate" class="chip">WP 1/8</div>
+      <div id="lap" class="chip">RANGE 1</div>
       <div id="best" class="chip">BEST --:--.---</div>
       <div id="heading" class="chip">000°</div>
       <div id="fps" class="chip">60 FPS</div>
@@ -41,8 +41,8 @@
     </div>
 
     <div id="statusLeft">
-      <span>ALT AGL</span><span id="alt">0.0 m</span>
-      <span>SPD</span><span id="spd">0 km/h</span>
+      <span>ALT MSL</span><span id="alt">0.0 m</span>
+      <span>IAS</span><span id="spd">0 km/h</span>
       <span>V/S</span><span id="vs">0.0 m/s</span>
       <span>THR</span><span id="thr">0%</span>
     </div>
@@ -50,23 +50,23 @@
     <div id="statusRight">
       <div class="meter"><div id="thrFill"></div></div>
       <div class="meter"><div id="batteryFill"></div></div>
-      <div id="voltage" class="chip">16.8V</div>
-      <div id="rssi" class="chip">RSSI 100%</div>
+      <div id="voltage" class="chip">FUEL 100%</div>
+      <div id="rssi" class="chip">LINK 100%</div>
       <div id="gps" class="chip">GPS 12 SAT</div>
     </div>
   </div>
 
   <div id="minimap">
-    <div class="minimapHeader">MAP [M]</div>
+    <div class="minimapHeader">TACTICAL [M]</div>
     <canvas id="minimapCanvas" width="220" height="220"></canvas>
   </div>
 
   <div id="fullMapOverlay" class="overlay">
     <div class="panel mapPanel">
-      <h1>КАРТА СЕКТОРА</h1>
+      <h1>ТАКТИЧЕСКАЯ КАРТА</h1>
       <div class="sub">
-        Зелёный гейт — следующий. Красные — уже пройденные в текущем круге.
-        Жми <b>M</b> или кнопку, чтобы закрыть.
+        Зелёный waypoint — следующая боевая точка. Красные — достигнутые.
+        Жёлтый треугольник — БПЛА FP-1.
       </div>
       <canvas id="fullMapCanvas" width="780" height="780"></canvas>
       <button id="closeMapBtn">ЗАКРЫТЬ [M]</button>
@@ -75,19 +75,23 @@
 
   <div id="helpOverlay" class="overlay">
     <div class="panel">
-      <h1>УПРАВЛЕНИЕ</h1>
-      <div class="sub">Это тренировочный симулятор, а не аттракцион для нежных.</div>
+      <h1>FP-1 БПЛА</h1>
+      <div class="sub">Одноразовый боевой беспилотник. Самолётная аэродинамика. Камикадзе.</div>
       <div class="controls">
-        <div class="control"><b>SPACE</b>ARM / DISARM. Перед взлётом обязательно вооружиться.</div>
-        <div class="control"><b>W / S</b>Газ. Держи примерно 35–48% для висения, зависит от батареи.</div>
-        <div class="control"><b>A / D</b>Yaw влево / вправо.</div>
-        <div class="control"><b>↑ / ↓</b>Pitch: наклон вперёд / назад.</div>
-        <div class="control"><b>← / →</b>Roll влево / вправо.</div>
-        <div class="control"><b>C</b>FPV / CHASE камера. В реплее переключает кино-камеры.</div>
-        <div class="control"><b>M</b>Полная карта сектора.</div>
-        <div class="control"><b>P</b>Ручной cinematic replay последнего полёта, если не в ARM.</div>
+        <div class="control"><b>SPACE</b>Запуск двигателя / аварийное отключение.</div>
+        <div class="control"><b>W / S</b>Газ (тяга толкающего пропеллера).</div>
+        <div class="control"><b>A / D</b>Rudder — рыскание (координированные развороты).</div>
+        <div class="control"><b>↑ / ↓</b>Elevator — тангаж (набор/снижение высоты).</div>
+        <div class="control"><b>← / →</b>Ailerons — крен (виражи).</div>
+        <div class="control"><b>C</b>FPV (нос) / CHASE (сзади-сверху) камера.</div>
+        <div class="control"><b>M</b>Тактическая карта.</div>
+        <div class="control"><b>P</b>Replay последнего вылета.</div>
         <div class="control"><b>H</b>Помощь.</div>
-        <div class="control"><b>R</b>Респаун. В реплее — пропустить и респаун.</div>
+        <div class="control"><b>R</b>Рестарт миссии.</div>
+      </div>
+      <div class="sub">
+        <b>ВАЖНО:</b> FP-1 не висит как квадрик. Ему нужна скорость для подъёмной силы.
+        Разгоняйся на взлёте, держи IAS > 60 km/h, не задирай нос выше 25° — будет stall.
       </div>
       <button id="helpClose">ЗАКРЫТЬ</button>
     </div>
@@ -95,49 +99,48 @@
 
   <div id="crashOverlay" class="overlay">
     <div class="panel">
-      <h1>ДРОН В ХЛАМ</h1>
+      <h1>УДАР / ДЕТАНАЦИЯ</h1>
       <div class="sub">
-        Жёсткая посадка, потеря управления или ты переборщил с акробатикой.
-        Можно респаунуться, а можно ещё раз посмотреть, как это было красиво.
+        БПЛА достиг цели или был уничтожен. Смотри replay или начинай новую миссию.
       </div>
       <button id="watchReplayBtn">СМОТРЕТЬ REPLAY</button>
-      <button id="respawnBtn">РЕСПАВН [R]</button>
+      <button id="respawnBtn">НОВАЯ МИССИЯ [R]</button>
     </div>
   </div>
 
   <div id="startOverlay" class="overlay">
     <div class="panel">
-      <h1>FPV-1 <span>ULTRA</span></h1>
+      <h1>FP-1 <span>БПЛА</span></h1>
       <div class="sub">
-        Тренировочный FPV-симулятор: 3D-карта, terrain, вода, ворота, круги,
-        телеметрия, батарея, RSSI, GPS, ветер, HDR-освещение, bloom, cinematic replay,
-        физика взрыва, GLB-модели и гибридный звук (CC0-записи + синтез).
-        Сначала жми <b>ПОЕХАЛИ</b>, затем <b>SPACE</b> для ARM.
+        Симулятор одноразового боевого БПЛА-камикадзе:
+        самолётная аэродинамика (подъёмная сила, stall, drag), GPS-навигация по waypoints,
+        HDR-освещение, bloom, cinematic replay, физика детонации, GLB-модели города,
+        гибридный звук (CC0-записи + синтез).
       </div>
       <div class="sub">
-        Ассеты: звук — BigSoundBank CC0, небо — Poly Haven CC0, город — three.js LittlestTokyo,
-        дрон — sdrangel-3d-models. Всё подтягивается в билде или заменяется fallback'ами.
+        Запускай двигатель (<b>SPACE</b>), разгоняйся на полосе (<b>W</b>),
+        поднимай нос при 70+ km/h, лети по waypoint'ам, достигай цели.
       </div>
 
       <div class="controls">
-        <div class="control"><b>SPACE</b>ARM / DISARM</div>
+        <div class="control"><b>SPACE</b>Двигатель</div>
         <div class="control"><b>W / S</b>Газ</div>
-        <div class="control"><b>A / D</b>Yaw</div>
-        <div class="control"><b>↑ / ↓</b>Pitch</div>
-        <div class="control"><b>← / →</b>Roll</div>
+        <div class="control"><b>A / D</b>Rudder</div>
+        <div class="control"><b>↑ / ↓</b>Elevator</div>
+        <div class="control"><b>← / →</b>Ailerons</div>
         <div class="control"><b>C</b>Камера</div>
         <div class="control"><b>M</b>Карта</div>
         <div class="control"><b>P</b>Replay</div>
-        <div class="control"><b>R</b>Респаун</div>
+        <div class="control"><b>R</b>Рестарт</div>
       </div>
 
-      <button id="startBtn">ПОЕХАЛИ</button>
+      <button id="startBtn">ВЫЛЕТ</button>
     </div>
   </div>
 
   <div id="fatal" class="overlay">
     <div class="panel">
-      <h1>ТЕХНИЧЕСКИЙ ПРОВАЛ</h1>
+      <h1>СИСТЕМНЫЙ СБОЙ</h1>
       <div id="fatalText" class="sub">Что-то сломалось.</div>
     </div>
   </div>
