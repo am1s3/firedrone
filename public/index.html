@@ -1,1 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FPV-1 ULTRA // Training Simulator</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app"></div>
 
+  <canvas id="noiseCanvas" width="256" height="144"></canvas>
+  <div id="vignette"></div>
+  <div id="explosionFlash"></div>
+
+  <div id="cineBars">
+    <div class="bar top"></div>
+    <div class="bar bottom"></div>
+  </div>
+
+  <div id="replayBadge">REPLAY // CINEMATIC</div>
+  <div id="cineHint">SPACE / ESC — пропустить · C — камера · R — респаун</div>
+
+  <div id="hud">
+    <div id="topbar">
+      <div id="armed" class="chip disarmed">DISARMED</div>
+      <div id="mode" class="chip">FPV</div>
+      <div id="models" class="chip">FPV-1: PROC · CITY: PROC</div>
+      <div id="timer" class="chip">00:00.000</div>
+      <div id="gate" class="chip">GATE 1/12</div>
+      <div id="lap" class="chip">LAP 1</div>
+      <div id="best" class="chip">BEST --:--.---</div>
+      <div id="heading" class="chip">000°</div>
+      <div id="fps" class="chip">60 FPS</div>
+    </div>
+
+    <div id="horizonWrap">
+      <div id="horizonInner"></div>
+      <div id="horizonLine"></div>
+      <div id="crosshair"></div>
+    </div>
+
+    <div id="statusLeft">
+      <span>ALT AGL</span><span id="alt">0.0 m</span>
+      <span>SPD</span><span id="spd">0 km/h</span>
+      <span>V/S</span><span id="vs">0.0 m/s</span>
+      <span>THR</span><span id="thr">0%</span>
+    </div>
+
+    <div id="statusRight">
+      <div class="meter"><div id="thrFill"></div></div>
+      <div class="meter"><div id="batteryFill"></div></div>
+      <div id="voltage" class="chip">16.8V</div>
+      <div id="rssi" class="chip">RSSI 100%</div>
+      <div id="gps" class="chip">GPS 12 SAT</div>
+    </div>
+  </div>
+
+  <div id="minimap">
+    <div class="minimapHeader">MAP [M]</div>
+    <canvas id="minimapCanvas" width="220" height="220"></canvas>
+  </div>
+
+  <div id="fullMapOverlay" class="overlay">
+    <div class="panel mapPanel">
+      <h1>КАРТА СЕКТОРА</h1>
+      <div class="sub">
+        Зелёный гейт — следующий. Красные — уже пройденные в текущем круге.
+        Жми <b>M</b> или кнопку, чтобы закрыть.
+      </div>
+      <canvas id="fullMapCanvas" width="780" height="780"></canvas>
+      <button id="closeMapBtn">ЗАКРЫТЬ [M]</button>
+    </div>
+  </div>
+
+  <div id="helpOverlay" class="overlay">
+    <div class="panel">
+      <h1>УПРАВЛЕНИЕ</h1>
+      <div class="sub">Это тренировочный симулятор, а не аттракцион для нежных.</div>
+      <div class="controls">
+        <div class="control"><b>SPACE</b>ARM / DISARM. Перед взлётом обязательно вооружиться.</div>
+        <div class="control"><b>W / S</b>Газ. Держи примерно 35–48% для висения, зависит от батареи.</div>
+        <div class="control"><b>A / D</b>Yaw влево / вправо.</div>
+        <div class="control"><b>↑ / ↓</b>Pitch: наклон вперёд / назад.</div>
+        <div class="control"><b>← / →</b>Roll влево / вправо.</div>
+        <div class="control"><b>C</b>FPV / CHASE камера. В реплее переключает кино-камеры.</div>
+        <div class="control"><b>M</b>Полная карта сектора.</div>
+        <div class="control"><b>P</b>Ручной cinematic replay последнего полёта, если не в ARM.</div>
+        <div class="control"><b>H</b>Помощь.</div>
+        <div class="control"><b>R</b>Респаун. В реплее — пропустить и респаун.</div>
+      </div>
+      <button id="helpClose">ЗАКРЫТЬ</button>
+    </div>
+  </div>
+
+  <div id="crashOverlay" class="overlay">
+    <div class="panel">
+      <h1>ДРОН В ХЛАМ</h1>
+      <div class="sub">
+        Жёсткая посадка, потеря управления или ты переборщил с акробатикой.
+        Можно респаунуться, а можно ещё раз посмотреть, как это было красиво.
+      </div>
+      <button id="watchReplayBtn">СМОТРЕТЬ REPLAY</button>
+      <button id="respawnBtn">РЕСПАВН [R]</button>
+    </div>
+  </div>
+
+  <div id="startOverlay" class="overlay">
+    <div class="panel">
+      <h1>FPV-1 <span>ULTRA</span></h1>
+      <div class="sub">
+        Тренировочный FPV-симулятор: 3D-карта, terrain, вода, ворота, круги,
+        телеметрия, батарея, RSSI, GPS, ветер, HDR-освещение, bloom, cinematic replay,
+        физика взрыва, GLB-модели и гибридный звук (CC0-записи + синтез).
+        Сначала жми <b>ПОЕХАЛИ</b>, затем <b>SPACE</b> для ARM.
+      </div>
+      <div class="sub">
+        Ассеты: звук — BigSoundBank CC0, небо — Poly Haven CC0, город — three.js LittlestTokyo,
+        дрон — sdrangel-3d-models. Всё подтягивается в билде или заменяется fallback'ами.
+      </div>
+
+      <div class="controls">
+        <div class="control"><b>SPACE</b>ARM / DISARM</div>
+        <div class="control"><b>W / S</b>Газ</div>
+        <div class="control"><b>A / D</b>Yaw</div>
+        <div class="control"><b>↑ / ↓</b>Pitch</div>
+        <div class="control"><b>← / →</b>Roll</div>
+        <div class="control"><b>C</b>Камера</div>
+        <div class="control"><b>M</b>Карта</div>
+        <div class="control"><b>P</b>Replay</div>
+        <div class="control"><b>R</b>Респаун</div>
+      </div>
+
+      <button id="startBtn">ПОЕХАЛИ</button>
+    </div>
+  </div>
+
+  <div id="fatal" class="overlay">
+    <div class="panel">
+      <h1>ТЕХНИЧЕСКИЙ ПРОВАЛ</h1>
+      <div id="fatalText" class="sub">Что-то сломалось.</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/MaskPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/RGBELoader.js"></script>
+
+  <script src="js/app.js"></script>
+  <script src="js/explosion.js"></script>
+  <script src="js/graphics.js"></script>
+  <script src="js/models.js"></script>
+  <script src="js/sound.js"></script>
+</body>
+</html>
